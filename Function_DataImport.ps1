@@ -86,40 +86,40 @@ function New-MaterialRecord {
 
     return [pscustomobject][ordered]@{
         material_class = [pscustomobject][ordered]@{
-            id = $Id
-            matnr_main = $MatnrMain
-            description = $Description
+            id                = $Id
+            matnr_main        = $MatnrMain
+            description       = $Description
             nato_stock_number = $NatoStockNumber
-            supplynumber = $SupplyNumber
-            mat_stat_main = $MatStatMain
-            properties = [pscustomobject][ordered]@{
-                productgroup = [pscustomobject][ordered]@{
-                    ext_wg = $ExtWg
+            supplynumber      = $SupplyNumber
+            mat_stat_main     = $MatStatMain
+            properties        = [pscustomobject][ordered]@{
+                productgroup   = [pscustomobject][ordered]@{
+                    ext_wg    = $ExtWg
                     dezentral = $Dezentral
-                    artnr = $ArtNr
-                    creditor = $Creditor
+                    artnr     = $ArtNr
+                    creditor  = $Creditor
                 }
                 dangerous_good = [pscustomobject][ordered]@{
-                    is_dg = $IsDg
+                    is_dg  = $IsDg
                     un_num = $UnNum
-                    tags = @($DangerousTags)
+                    tags   = @($DangerousTags)
                 }
-                quantity = [pscustomobject][ordered]@{
-                    unit_main = $UnitMain
+                quantity       = [pscustomobject][ordered]@{
+                    unit_main       = $UnitMain
                     quantity_target = $QuantityTarget
-                    alt_units = @($AltUnits)
+                    alt_units       = @($AltUnits)
                 }
             }
-            alt_material = @($AltMaterial)
-            mat_ref = [pscustomobject][ordered]@{
-                WtgWaStff = @($WtgWaStff)
+            alt_material      = @($AltMaterial)
+            mat_ref           = [pscustomobject][ordered]@{
+                WtgWaStff  = @($WtgWaStff)
                 'Inst/Elo' = @($InstElo)
             }
-            comments = [pscustomobject][ordered]@{
+            comments          = [pscustomobject][ordered]@{
                 logistics = $Logistics
                 technical = $Technical
             }
-            misc = [pscustomobject][ordered]@{
+            misc              = [pscustomobject][ordered]@{
                 tags = @($MiscTags)
             }
         }
@@ -403,12 +403,12 @@ $btnBrowse.Text = 'Durchsuchen...'
 $btnBrowse.Location = New-Object System.Drawing.Point(660, 14)
 $btnBrowse.Size = New-Object System.Drawing.Size(100, 28)
 $btnBrowse.Add_Click({
-    $ofd = New-Object System.Windows.Forms.OpenFileDialog
-    $ofd.Filter = 'CSV/Text-Dateien (*.csv;*.txt)|*.csv;*.txt|Alle Dateien (*.*)|*.*'
-    if ($ofd.ShowDialog() -eq 'OK') {
-        $txtFile.Text = $ofd.FileName
-    }
-})
+        $ofd = New-Object System.Windows.Forms.OpenFileDialog
+        $ofd.Filter = 'CSV/Text-Dateien (*.csv;*.txt)|*.csv;*.txt|Alle Dateien (*.*)|*.*'
+        if ($ofd.ShowDialog() -eq 'OK') {
+            $txtFile.Text = $ofd.FileName
+        }
+    })
 $form.Controls.Add($btnBrowse)
 
 $btnImport = New-Object System.Windows.Forms.Button
@@ -417,15 +417,15 @@ $btnImport.Location = New-Object System.Drawing.Point(12, 50)
 $btnImport.Size = New-Object System.Drawing.Size(180, 40)
 $btnImport.BackColor = [System.Drawing.Color]::LightGreen
 $btnImport.Add_Click({
-    if ([string]::IsNullOrWhiteSpace($txtFile.Text)) {
-        [System.Windows.Forms.MessageBox]::Show('Bitte eine Datei auswaehlen!', 'Hinweis', 'OK', 'Warning')
-        return
-    }
+        if ([string]::IsNullOrWhiteSpace($txtFile.Text)) {
+            [System.Windows.Forms.MessageBox]::Show('Bitte eine Datei auswaehlen!', 'Hinweis', 'OK', 'Warning')
+            return
+        }
 
-    $btnImport.Enabled = $false
-    Start-InitialImport -SourceFile $txtFile.Text
-    $btnImport.Enabled = $true
-})
+        $btnImport.Enabled = $false
+        Start-InitialImport -SourceFile $txtFile.Text
+        $btnImport.Enabled = $true
+    })
 $form.Controls.Add($btnImport)
 
 $txtLog = New-Object System.Windows.Forms.TextBox
@@ -445,4 +445,3 @@ Write-ImportLog "Logdatei: $LogFile" 'INFO'
 Write-ImportLog "Datenbank: $DbPath" 'INFO'
 
 $form.ShowDialog() | Out-Null
-
