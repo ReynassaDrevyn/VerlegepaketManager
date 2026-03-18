@@ -6,20 +6,17 @@ Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
 Add-Type -AssemblyName System.Windows.Forms
 
-# Konfiguration
 $ProjectRoot = $(if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path $MyInvocation.MyCommand.Path -Parent })
 $DbPath = Join-Path $ProjectRoot 'Core\db_verlegepaket.json'
 $LogsDir = Join-Path $ProjectRoot 'Logs'
 $BackupDir = Join-Path $LogsDir 'Backups'
 $LogFile = Join-Path $LogsDir "InitialImport_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 
-# Ordner anlegen
 if (!(Test-Path $LogsDir)) { New-Item -Path $LogsDir -ItemType Directory -Force | Out-Null }
 if (!(Test-Path $BackupDir)) { New-Item -Path $BackupDir -ItemType Directory -Force | Out-Null }
 $dbDir = Split-Path $DbPath -Parent
 if (!(Test-Path $dbDir)) { New-Item -Path $dbDir -ItemType Directory -Force | Out-Null }
 
-# Logging
 $global:LogBox = $null
 
 function Write-ImportLog {
@@ -40,29 +37,378 @@ function Write-ImportLog {
     }
 }
 
+function Get-NormalizedString {
+    param([AllowNull()][object]$Value)
+
+    if ($null -eq $Value) {
+        return ''
+    }
+
+    return ([string]$Value).Trim()
+}
+
+function ConvertTo-NormalizedHeaderName {
+    param([string]$Header)
+
+    $normalized = Get-NormalizedString $Header
+    $normalized = $normalized.ToLowerInvariant()
+    $normalized = $normalized.Replace(([string][char]0x00E4), 'ae')
+    $normalized = $normalized.Replace(([string][char]0x00F6), 'oe')
+    $normalized = $normalized.Replace(([string][char]0x00FC), 'ue')
+    $normalized = $normalized.Replace(([string][char]0x00DF), 'ss')
+    $normalized = $normalized.Replace(([string][char]0x00C4), 'ae')
+    $normalized = $normalized.Replace(([string][char]0x00D6), 'oe')
+    $normalized = $normalized.Replace(([string][char]0x00DC), 'ue')
+    $normalized = $normalized -replace '[^a-z0-9]+', ' '
+    $normalized = $normalized -replace '\s+', ' '
+
+    return $normalized.Trim()
+}
+
+function Get-HeaderDefinitions {
+    return @(
+        [pscustomobject]@{ Key = 'matnr_main'; Required = $true; Patterns = @('^materialnummer.*saspf$', '^matnr.*saspf$', '^materialnummer$') }
+        [pscustomobject]@{ Key = 'supplynumber'; Required = $false; Patterns = @('^versnr$', '^vers nr$', '^versorgungsnummer$') }
+        [pscustomobject]@{ Key = 'mat_stat_main'; Required = $false; Patterns = @('^status.*matnr$', '^status.*materialnummer$') }
+        [pscustomobject]@{ Key = 'dezentral'; Required = $false; Patterns = @('^dezent$', '^dezentral$') }
+        [pscustomobject]@{ Key = 'ext_wg'; Required = $false; Patterns = @('^ext wg$', '^ext warengruppe$') }
+        [pscustomobject]@{ Key = 'artnr'; Required = $false; Patterns = @('^artikel nr$', '^artikelnr$', '^art nr$', '^artnr$') }
+        [pscustomobject]@{ Key = 'description'; Required = $false; Patterns = @('^materialbezeichnung$', '^bezeichnung$', '^description$') }
+        [pscustomobject]@{ Key = 'technical'; Required = $false; Patterns = @('^bezeichnung technik$', '^technik$') }
+        [pscustomobject]@{ Key = 'logistics'; Required = $false; Patterns = @('^bemerkung$', '^logistik$', '^logistics$') }
+        [pscustomobject]@{ Key = 'unit_main'; Required = $false; Patterns = @('^bze$', '^einheit$') }
+        [pscustomobject]@{ Key = 'quantity_target'; Required = $false; Patterns = @('^tlg 74$', '^menge$', '^quantity$') }
+        [pscustomobject]@{ Key = 'is_dg'; Required = $false; Patterns = @('^gefstoff$', '^dg$') }
+        [pscustomobject]@{ Key = 'GefStoff Verlegung'; Required = $false; Patterns = @('^gefstoff verlegung$') }
+        [pscustomobject]@{ Key = 'Gefahrgut'; Required = $false; Patterns = @('^gefahrgut$', '^gefahr gut$') }
+        [pscustomobject]@{ Key = 'Batterie'; Required = $false; Patterns = @('^batterie$') }
+        [pscustomobject]@{ Key = 'Flight'; Required = $false; Patterns = @('^flight$') }
+        [pscustomobject]@{ Key = 'Waffen'; Required = $false; Patterns = @('^waffen$') }
+        [pscustomobject]@{ Key = 'Munition'; Required = $false; Patterns = @('^munition$') }
+        [pscustomobject]@{ Key = 'RTS'; Required = $false; Patterns = @('^rts$') }
+        [pscustomobject]@{ Key = 'AUG'; Required = $false; Patterns = @('^aug$') }
+        [pscustomobject]@{ Key = 'WEF'; Required = $false; Patterns = @('^wef$') }
+        [pscustomobject]@{ Key = 'BoGe'; Required = $false; Patterns = @('^boge$') }
+        [pscustomobject]@{ Key = 'HFT'; Required = $false; Patterns = @('^hft$') }
+        [pscustomobject]@{ Key = 'LME'; Required = $false; Patterns = @('^lme$') }
+        [pscustomobject]@{ Key = 'REG'; Required = $false; Patterns = @('^reg$') }
+        [pscustomobject]@{ Key = 'RNW'; Required = $false; Patterns = @('^rnw$') }
+        [pscustomobject]@{ Key = 'Rad Reifen Shop'; Required = $false; Patterns = @('^rad reifen shop$') }
+        [pscustomobject]@{ Key = 'IETPX Material'; Required = $false; Patterns = @('^ietpx material$') }
+        [pscustomobject]@{ Key = 'GUN ON AC'; Required = $false; Patterns = @('^gun on ac$') }
+        [pscustomobject]@{ Key = 'GUN OFF AC'; Required = $false; Patterns = @('^gun off ac$') }
+        [pscustomobject]@{ Key = 'GUN'; Required = $false; Patterns = @('^gun$') }
+        [pscustomobject]@{ Key = 'IRIS-T'; Required = $false; Patterns = @('^iris t$') }
+        [pscustomobject]@{ Key = 'FLARE'; Required = $false; Patterns = @('^flare$') }
+        [pscustomobject]@{ Key = 'AIM 120'; Required = $false; Patterns = @('^aim 120$', '^aim120$') }
+        [pscustomobject]@{ Key = '1000 l SFT'; Required = $false; Patterns = @('^1000 l sft$', '^1000l sft$') }
+        [pscustomobject]@{ Key = 'GBU 48'; Required = $false; Patterns = @('^gbu 48$', '^gbu48$') }
+        [pscustomobject]@{ Key = 'Meteor'; Required = $false; Patterns = @('^meteor$') }
+        [pscustomobject]@{ Key = 'LDP'; Required = $false; Patterns = @('^ldp$') }
+        [pscustomobject]@{ Key = 'IWP'; Required = $false; Patterns = @('^iwp$') }
+        [pscustomobject]@{ Key = 'CFP'; Required = $false; Patterns = @('^cfp$') }
+        [pscustomobject]@{ Key = 'MFRL'; Required = $false; Patterns = @('^mfrl$') }
+        [pscustomobject]@{ Key = 'OWP'; Required = $false; Patterns = @('^owp$') }
+        [pscustomobject]@{ Key = 'CHAFF'; Required = $false; Patterns = @('^chaff$') }
+        [pscustomobject]@{ Key = 'MEL'; Required = $false; Patterns = @('^mel$') }
+        [pscustomobject]@{ Key = 'ITSPL'; Required = $false; Patterns = @('^itspl$') }
+    )
+}
+
+function Resolve-HeaderMap {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Headers,
+        [Parameter(Mandatory = $true)]$Definitions
+    )
+
+    $resolved = @{}
+    $normalizedHeaders = @{}
+
+    foreach ($header in $Headers) {
+        $normalizedHeaders[$header] = ConvertTo-NormalizedHeaderName $header
+    }
+
+    foreach ($definition in $Definitions) {
+        foreach ($header in $Headers) {
+            $normalized = $normalizedHeaders[$header]
+            foreach ($pattern in $definition.Patterns) {
+                if ($normalized -match $pattern) {
+                    if (-not $resolved.ContainsKey($definition.Key)) {
+                        $resolved[$definition.Key] = $header
+                    }
+                    break
+                }
+            }
+
+            if ($resolved.ContainsKey($definition.Key)) {
+                break
+            }
+        }
+    }
+
+    $missingRequired = @()
+    $missingOptional = @()
+    foreach ($definition in $Definitions) {
+        if (-not $resolved.ContainsKey($definition.Key)) {
+            if ($definition.Required) {
+                $missingRequired += $definition.Key
+            }
+            else {
+                $missingOptional += $definition.Key
+            }
+        }
+    }
+
+    return [pscustomobject]@{
+        HeaderMap       = $resolved
+        MissingRequired = $missingRequired
+        MissingOptional = $missingOptional
+        Normalized      = $normalizedHeaders
+    }
+}
+
 function Get-CellValue {
     param(
         [Parameter(Mandatory = $true)]$Row,
-        [Parameter(Mandatory = $true)][hashtable]$IndexMap,
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap,
         [Parameter(Mandatory = $true)][string]$Key
     )
 
-    if ($IndexMap.ContainsKey($Key)) {
-        return [string]$Row.PSObject.Properties.Value[$IndexMap[$Key]]
+    if (-not $HeaderMap.ContainsKey($Key)) {
+        return ''
     }
 
-    return ''
+    $headerName = $HeaderMap[$Key]
+    $property = $Row.PSObject.Properties[$headerName]
+    if ($null -eq $property) {
+        return ''
+    }
+
+    return Get-NormalizedString $property.Value
+}
+
+function Test-HeaderAvailable {
+    param(
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    return $HeaderMap.ContainsKey($Key)
+}
+
+function Test-HasUtf8Bom {
+    param([byte[]]$Bytes)
+
+    return $Bytes.Length -ge 3 -and $Bytes[0] -eq 0xEF -and $Bytes[1] -eq 0xBB -and $Bytes[2] -eq 0xBF
+}
+
+function Read-TextFileWithEncodingFallback {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    $encoding = $null
+    $text = ''
+
+    if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) {
+        $encoding = [System.Text.Encoding]::Unicode
+        $text = $encoding.GetString($bytes, 2, $bytes.Length - 2)
+    }
+    elseif ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF) {
+        $encoding = [System.Text.Encoding]::BigEndianUnicode
+        $text = $encoding.GetString($bytes, 2, $bytes.Length - 2)
+    }
+    elseif (Test-HasUtf8Bom -Bytes $bytes) {
+        $encoding = New-Object System.Text.UTF8Encoding($true)
+        $text = $encoding.GetString($bytes, 3, $bytes.Length - 3)
+    }
+    else {
+        try {
+            $utf8NoBom = New-Object System.Text.UTF8Encoding($false, $true)
+            $text = $utf8NoBom.GetString($bytes)
+            $encoding = $utf8NoBom
+        }
+        catch {
+            $encoding = [System.Text.Encoding]::Default
+            $text = $encoding.GetString($bytes)
+        }
+    }
+
+    return [pscustomobject]@{
+        Text         = $text
+        EncodingName = $encoding.WebName
+    }
+}
+
+function Import-DelimitedCsvText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Text,
+        [string]$Delimiter = ';'
+    )
+
+    return @($Text | ConvertFrom-Csv -Delimiter $Delimiter)
+}
+
+function Load-CsvData {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $fileData = Read-TextFileWithEncodingFallback -Path $Path
+    $rows = Import-DelimitedCsvText -Text $fileData.Text
+
+    return [pscustomobject]@{
+        Rows         = $rows
+        EncodingName = $fileData.EncodingName
+    }
+}
+
+function Try-ParseImportBoolean {
+    param([AllowNull()][string]$Value)
+
+    $text = Get-NormalizedString $Value
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        return [pscustomobject]@{ Success = $true; Value = $false; IsBlank = $true }
+    }
+
+    $normalized = $text.ToLowerInvariant()
+    if (@('x', '1', 'true', 'ja', 'yes', 'y', 'j') -contains $normalized) {
+        return [pscustomobject]@{ Success = $true; Value = $true; IsBlank = $false }
+    }
+
+    if (@('0', 'false', 'nein', 'no', 'n') -contains $normalized) {
+        return [pscustomobject]@{ Success = $true; Value = $false; IsBlank = $false }
+    }
+
+    return [pscustomobject]@{ Success = $false; Value = $false; IsBlank = $false }
 }
 
 function Test-Flag {
     param(
         [Parameter(Mandatory = $true)]$Row,
-        [Parameter(Mandatory = $true)][hashtable]$IndexMap,
-        [Parameter(Mandatory = $true)][string]$Key,
-        [string]$Pattern = '^[xX1]$'
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap,
+        [Parameter(Mandatory = $true)][string]$Key
     )
 
-    return (Get-CellValue -Row $Row -IndexMap $IndexMap -Key $Key) -match $Pattern
+    $parsed = Try-ParseImportBoolean (Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key $Key)
+    return $parsed.Success -and $parsed.Value
+}
+
+function Try-ParseImportNumber {
+    param([AllowNull()][string]$Value)
+
+    $text = Get-NormalizedString $Value
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        return [pscustomobject]@{ Success = $true; Value = 0.0; IsBlank = $true }
+    }
+
+    $parsed = 0.0
+    $deCulture = [System.Globalization.CultureInfo]::GetCultureInfo('de-DE')
+    if ([double]::TryParse($text, [System.Globalization.NumberStyles]::Any, $deCulture, [ref]$parsed)) {
+        return [pscustomobject]@{ Success = $true; Value = $parsed; IsBlank = $false }
+    }
+
+    $invariantCulture = [System.Globalization.CultureInfo]::InvariantCulture
+    if ([double]::TryParse($text, [System.Globalization.NumberStyles]::Any, $invariantCulture, [ref]$parsed)) {
+        return [pscustomobject]@{ Success = $true; Value = $parsed; IsBlank = $false }
+    }
+
+    return [pscustomobject]@{ Success = $false; Value = 0.0; IsBlank = $false }
+}
+
+function Get-DerivedNatoStockNumber {
+    param(
+        [string]$MatnrMain,
+        [string]$SupplyNumber
+    )
+
+    $trimmedMatnr = Get-NormalizedString $MatnrMain
+    $trimmedSupply = Get-NormalizedString $SupplyNumber
+
+    if ([string]::IsNullOrWhiteSpace($trimmedMatnr) -or [string]::IsNullOrWhiteSpace($trimmedSupply)) {
+        return ''
+    }
+
+    $supplyDigits = $trimmedSupply -replace '[^0-9]', ''
+    if ($trimmedMatnr -match '^\d+$' -and $supplyDigits -and $trimmedMatnr -eq $supplyDigits) {
+        return $trimmedMatnr
+    }
+
+    return ''
+}
+
+function ConvertTo-MaterialArray {
+    param([AllowNull()]$InputObject)
+
+    if ($null -eq $InputObject) {
+        return @()
+    }
+
+    if ($InputObject -is [System.Array]) {
+        return @($InputObject)
+    }
+
+    if ($InputObject.PSObject.Properties['material_class']) {
+        return @($InputObject)
+    }
+
+    return @($InputObject)
+}
+
+function Get-ExistingMaterialLookup {
+    param([Parameter(Mandatory = $true)][object[]]$Materials)
+
+    $lookup = @{}
+    for ($i = 0; $i -lt $Materials.Count; $i++) {
+        $matnr = Get-NormalizedString $Materials[$i].material_class.matnr_main
+        if (-not [string]::IsNullOrWhiteSpace($matnr) -and -not $lookup.ContainsKey($matnr)) {
+            $lookup[$matnr] = $i
+        }
+    }
+
+    return $lookup
+}
+
+function Get-NextMaterialId {
+    param([Parameter(Mandatory = $true)][object[]]$Materials)
+
+    $maxId = 999
+    foreach ($material in $Materials) {
+        $idText = Get-NormalizedString $material.material_class.id
+        $idValue = 0
+        if ([int]::TryParse($idText, [ref]$idValue) -and $idValue -gt $maxId) {
+            $maxId = $idValue
+        }
+    }
+
+    return $maxId
+}
+
+function Load-ExistingDatabase {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not (Test-Path $Path)) {
+        return [pscustomobject]@{
+            Materials = @()
+            Lookup    = @{}
+            MaxId     = 999
+        }
+    }
+
+    $raw = Get-Content -Path $Path -Raw -Encoding UTF8
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        return [pscustomobject]@{
+            Materials = @()
+            Lookup    = @{}
+            MaxId     = 999
+        }
+    }
+
+    $parsed = $raw | ConvertFrom-Json
+    $materials = ConvertTo-MaterialArray $parsed
+
+    return [pscustomobject]@{
+        Materials = $materials
+        Lookup    = Get-ExistingMaterialLookup -Materials $materials
+        MaxId     = Get-NextMaterialId -Materials $materials
+    }
 }
 
 function New-MaterialRecord {
@@ -74,7 +420,7 @@ function New-MaterialRecord {
         [string]$SupplyNumber,
         [string]$MatStatMain,
         [string]$ExtWg,
-        $Dezentral,
+        [bool]$Dezentral,
         [string]$ArtNr,
         [string]$Creditor,
         [bool]$IsDg,
@@ -133,9 +479,341 @@ function New-MaterialRecord {
     }
 }
 
-# Hauptfunktion
+function Get-ImportedTagValues {
+    param(
+        [Parameter(Mandatory = $true)]$Row,
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap,
+        [Parameter(Mandatory = $true)][string[]]$Keys
+    )
+
+    $tags = New-Object System.Collections.Generic.List[string]
+    foreach ($key in $Keys) {
+        if (Test-Flag -Row $Row -HeaderMap $HeaderMap -Key $key) {
+            [void]$tags.Add($key)
+        }
+    }
+
+    return @($tags)
+}
+
+function Get-ExistingTagSet {
+    param(
+        $ExistingMaterial,
+        [Parameter(Mandatory = $true)][string]$Category
+    )
+
+    if (-not $ExistingMaterial) {
+        return @()
+    }
+
+    switch ($Category) {
+        'DangerousTags' { return @($ExistingMaterial.material_class.properties.dangerous_good.tags) }
+        'WtgWaStff' { return @($ExistingMaterial.material_class.mat_ref.WtgWaStff) }
+        'InstElo' { return @($ExistingMaterial.material_class.mat_ref.'Inst/Elo') }
+        'MiscTags' { return @($ExistingMaterial.material_class.misc.tags) }
+        default { return @() }
+    }
+}
+
+function Merge-TagValues {
+    param(
+        [Parameter(Mandatory = $true)]$Row,
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap,
+        [Parameter(Mandatory = $true)][string[]]$Keys,
+        [Parameter(Mandatory = $true)][string]$Category,
+        $ExistingMaterial = $null
+    )
+
+    $existingSet = @{}
+    foreach ($tag in (Get-ExistingTagSet -ExistingMaterial $ExistingMaterial -Category $Category)) {
+        $existingSet[(Get-NormalizedString $tag)] = $true
+    }
+
+    $merged = New-Object System.Collections.Generic.List[string]
+    foreach ($key in $Keys) {
+        if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key $key) {
+            if (Test-Flag -Row $Row -HeaderMap $HeaderMap -Key $key) {
+                [void]$merged.Add($key)
+            }
+        }
+        elseif ($existingSet.ContainsKey($key)) {
+            [void]$merged.Add($key)
+        }
+    }
+
+    return @($merged)
+}
+
+function Get-ImportedScalarValue {
+    param(
+        [Parameter(Mandatory = $true)]$Row,
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap,
+        [Parameter(Mandatory = $true)][string]$Key,
+        $ExistingMaterial = $null,
+        [string]$ExistingValue = ''
+    )
+
+    if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key $Key) {
+        return Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key $Key
+    }
+
+    if ($ExistingMaterial) {
+        return Get-NormalizedString $ExistingValue
+    }
+
+    return ''
+}
+
+function Convert-RowToImportData {
+    param(
+        [Parameter(Mandatory = $true)]$Row,
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap,
+        [Parameter(Mandatory = $true)][int]$RowNumber,
+        $ExistingMaterial = $null
+    )
+
+    $warnings = New-Object System.Collections.Generic.List[string]
+
+    $matnr = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'matnr_main'
+    if ([string]::IsNullOrWhiteSpace($matnr)) {
+        return [pscustomobject]@{
+            ShouldSkip = $true
+            Warnings   = @("Zeile $RowNumber - matnr_main leer, uebersprungen")
+        }
+    }
+
+    $existingQuantityTarget = 0.0
+    if ($ExistingMaterial) {
+        $existingQuantityTarget = [double]$ExistingMaterial.material_class.properties.quantity.quantity_target
+    }
+
+    if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key 'quantity_target') {
+        $qtyRaw = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'quantity_target'
+        $qtyParse = Try-ParseImportNumber $qtyRaw
+        $quantityTarget = $qtyParse.Value
+        if (-not $qtyParse.Success) {
+            if ($ExistingMaterial) {
+                $quantityTarget = $existingQuantityTarget
+                [void]$warnings.Add("Zeile $RowNumber - Menge '$qtyRaw' ungueltig, vorhandenen Wert beibehalten")
+            }
+            else {
+                [void]$warnings.Add("Zeile $RowNumber - Menge '$qtyRaw' ungueltig, Standardwert 0 verwendet")
+            }
+        }
+    }
+    else {
+        $quantityTarget = $existingQuantityTarget
+    }
+
+    $existingDezentral = $false
+    if ($ExistingMaterial) {
+        $existingDezentral = [bool]$ExistingMaterial.material_class.properties.productgroup.dezentral
+    }
+
+    if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key 'dezentral') {
+        $dezentRaw = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'dezentral'
+        $dezentParse = Try-ParseImportBoolean $dezentRaw
+        $dezentralValue = $false
+        if ($dezentParse.Success) {
+            $dezentralValue = [bool]$dezentParse.Value
+        }
+        elseif ($ExistingMaterial) {
+            $dezentralValue = $existingDezentral
+            [void]$warnings.Add("Zeile $RowNumber - Dezentralwert '$dezentRaw' ungueltig, vorhandenen Wert beibehalten")
+        }
+        else {
+            [void]$warnings.Add("Zeile $RowNumber - Dezentralwert '$dezentRaw' ungueltig, Standardwert false verwendet")
+        }
+    }
+    else {
+        $dezentralValue = $existingDezentral
+    }
+
+    $existingIsDg = $false
+    if ($ExistingMaterial) {
+        $existingIsDg = [bool]$ExistingMaterial.material_class.properties.dangerous_good.is_dg
+    }
+
+    if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key 'is_dg') {
+        $isDgRaw = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'is_dg'
+        $isDgParse = Try-ParseImportBoolean $isDgRaw
+        $explicitIsDg = $false
+        if ($isDgParse.Success) {
+            $explicitIsDg = [bool]$isDgParse.Value
+        }
+        elseif ($ExistingMaterial) {
+            $explicitIsDg = $existingIsDg
+            [void]$warnings.Add("Zeile $RowNumber - Gefahrstoffwert '$isDgRaw' ungueltig, vorhandenen Wert beibehalten")
+        }
+        else {
+            [void]$warnings.Add("Zeile $RowNumber - Gefahrstoffwert '$isDgRaw' ungueltig, Standardwert false verwendet")
+        }
+    }
+    else {
+        $explicitIsDg = $existingIsDg
+    }
+
+    $dangerousTags = Merge-TagValues -Row $Row -HeaderMap $HeaderMap -Keys @('GefStoff Verlegung', 'Gefahrgut', 'Batterie') -Category 'DangerousTags' -ExistingMaterial $ExistingMaterial
+    $wtgWaStff = Merge-TagValues -Row $Row -HeaderMap $HeaderMap -Keys @('Flight', 'Waffen', 'Munition') -Category 'WtgWaStff' -ExistingMaterial $ExistingMaterial
+    $instElo = Merge-TagValues -Row $Row -HeaderMap $HeaderMap -Keys @('RTS', 'AUG', 'WEF', 'BoGe', 'HFT', 'LME', 'REG', 'RNW', 'Rad Reifen Shop') -Category 'InstElo' -ExistingMaterial $ExistingMaterial
+    $miscTags = Merge-TagValues -Row $Row -HeaderMap $HeaderMap -Keys @('IETPX Material', 'GUN', 'GUN ON AC', 'GUN OFF AC', 'IRIS-T', 'FLARE', 'AIM 120', '1000 l SFT', 'GBU 48', 'Meteor', 'LDP', 'IWP', 'CFP', 'MFRL', 'OWP', 'CHAFF', 'MEL', 'ITSPL') -Category 'MiscTags' -ExistingMaterial $ExistingMaterial
+
+    $matStatValue = 'XX'
+    if ($ExistingMaterial) {
+        $matStatValue = Get-NormalizedString $ExistingMaterial.material_class.mat_stat_main
+        if ([string]::IsNullOrWhiteSpace($matStatValue)) {
+            $matStatValue = 'XX'
+        }
+    }
+
+    if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key 'mat_stat_main') {
+        $matStatRaw = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'mat_stat_main'
+        if (-not [string]::IsNullOrWhiteSpace($matStatRaw)) {
+            $trimmedMatStat = $matStatRaw.Trim()
+            if ($trimmedMatStat.Length -eq 2) {
+                $matStatValue = $trimmedMatStat
+            }
+            else {
+                $matStatValue = if ($ExistingMaterial) { $matStatValue } else { 'XX' }
+                [void]$warnings.Add("Zeile $RowNumber - MatStatus '$matStatRaw' ungueltig, Wert beibehalten")
+            }
+        }
+        elseif (-not $ExistingMaterial) {
+            $matStatValue = 'XX'
+        }
+    }
+
+    $existingSupplyNumber = ''
+    if ($ExistingMaterial) {
+        $existingSupplyNumber = Get-NormalizedString $ExistingMaterial.material_class.supplynumber
+    }
+    $supplyNumber = Get-ImportedScalarValue -Row $Row -HeaderMap $HeaderMap -Key 'supplynumber' -ExistingMaterial $ExistingMaterial -ExistingValue $existingSupplyNumber
+    $derivedNato = Get-DerivedNatoStockNumber -MatnrMain $matnr -SupplyNumber $supplyNumber
+    if ([string]::IsNullOrWhiteSpace($derivedNato) -and $ExistingMaterial) {
+        $derivedNato = Get-NormalizedString $ExistingMaterial.material_class.nato_stock_number
+    }
+
+    return [pscustomobject]@{
+        ShouldSkip      = $false
+        Warnings        = @($warnings)
+        MatnrMain       = $matnr
+        Description     = Get-ImportedScalarValue -Row $Row -HeaderMap $HeaderMap -Key 'description' -ExistingMaterial $ExistingMaterial -ExistingValue $ExistingMaterial.material_class.description
+        NatoStockNumber = $derivedNato
+        SupplyNumber    = $supplyNumber
+        MatStatMain     = $matStatValue
+        ExtWg           = Get-ImportedScalarValue -Row $Row -HeaderMap $HeaderMap -Key 'ext_wg' -ExistingMaterial $ExistingMaterial -ExistingValue $ExistingMaterial.material_class.properties.productgroup.ext_wg
+        Dezentral       = $dezentralValue
+        ArtNr           = Get-ImportedScalarValue -Row $Row -HeaderMap $HeaderMap -Key 'artnr' -ExistingMaterial $ExistingMaterial -ExistingValue $ExistingMaterial.material_class.properties.productgroup.artnr
+        IsDg            = ($explicitIsDg -or $dangerousTags.Count -gt 0)
+        DangerousTags   = $dangerousTags
+        UnitMain        = Get-ImportedScalarValue -Row $Row -HeaderMap $HeaderMap -Key 'unit_main' -ExistingMaterial $ExistingMaterial -ExistingValue $ExistingMaterial.material_class.properties.quantity.unit_main
+        QuantityTarget  = [double]$quantityTarget
+        WtgWaStff       = $wtgWaStff
+        InstElo         = $instElo
+        Logistics       = Get-ImportedScalarValue -Row $Row -HeaderMap $HeaderMap -Key 'logistics' -ExistingMaterial $ExistingMaterial -ExistingValue $ExistingMaterial.material_class.comments.logistics
+        Technical       = Get-ImportedScalarValue -Row $Row -HeaderMap $HeaderMap -Key 'technical' -ExistingMaterial $ExistingMaterial -ExistingValue $ExistingMaterial.material_class.comments.technical
+        MiscTags        = $miscTags
+    }
+}
+
+function Merge-MaterialRecord {
+    param(
+        [Parameter(Mandatory = $true)]$ImportData,
+        $ExistingMaterial = $null,
+        [Parameter(Mandatory = $true)][int]$Id
+    )
+
+    $creditor = ''
+    $unNum = ''
+    $altUnits = @()
+    $altMaterial = @()
+
+    if ($ExistingMaterial) {
+        $creditor = Get-NormalizedString $ExistingMaterial.material_class.properties.productgroup.creditor
+        $unNum = Get-NormalizedString $ExistingMaterial.material_class.properties.dangerous_good.un_num
+        $altUnits = @($ExistingMaterial.material_class.properties.quantity.alt_units)
+        $altMaterial = @($ExistingMaterial.material_class.alt_material)
+    }
+
+    return New-MaterialRecord `
+        -Id $Id `
+        -MatnrMain $ImportData.MatnrMain `
+        -Description $ImportData.Description `
+        -NatoStockNumber $ImportData.NatoStockNumber `
+        -SupplyNumber $ImportData.SupplyNumber `
+        -MatStatMain $ImportData.MatStatMain `
+        -ExtWg $ImportData.ExtWg `
+        -Dezentral ([bool]$ImportData.Dezentral) `
+        -ArtNr $ImportData.ArtNr `
+        -Creditor $creditor `
+        -IsDg ([bool]$ImportData.IsDg) `
+        -UnNum $unNum `
+        -DangerousTags $ImportData.DangerousTags `
+        -UnitMain $ImportData.UnitMain `
+        -QuantityTarget ([double]$ImportData.QuantityTarget) `
+        -AltUnits $altUnits `
+        -AltMaterial $altMaterial `
+        -WtgWaStff $ImportData.WtgWaStff `
+        -InstElo $ImportData.InstElo `
+        -Logistics $ImportData.Logistics `
+        -Technical $ImportData.Technical `
+        -MiscTags $ImportData.MiscTags
+}
+
+function Test-DuplicateImportKeys {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Rows,
+        [Parameter(Mandatory = $true)][hashtable]$HeaderMap
+    )
+
+    $seen = @{}
+    $duplicates = New-Object System.Collections.Generic.List[string]
+
+    for ($index = 0; $index -lt $Rows.Count; $index++) {
+        $rowNumber = $index + 2
+        $matnr = Get-CellValue -Row $Rows[$index] -HeaderMap $HeaderMap -Key 'matnr_main'
+        if ([string]::IsNullOrWhiteSpace($matnr)) {
+            continue
+        }
+
+        if ($seen.ContainsKey($matnr)) {
+            [void]$duplicates.Add("matnr_main '$matnr' in Zeile $($seen[$matnr]) und Zeile $rowNumber")
+        }
+        else {
+            $seen[$matnr] = $rowNumber
+        }
+    }
+
+    return @($duplicates)
+}
+
+function Backup-DatabaseFile {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not (Test-Path $Path)) {
+        return $null
+    }
+
+    $backupName = "db_verlegepaket_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
+    $backupPath = Join-Path $BackupDir $backupName
+    Copy-Item -Path $Path -Destination $backupPath -Force
+    return $backupPath
+}
+
+function Save-DatabaseFile {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][object[]]$Materials
+    )
+
+    $Materials | ConvertTo-Json -Depth 10 | Out-File -FilePath $Path -Encoding UTF8
+}
+
 function Start-InitialImport {
-    param([string]$SourceFile)
+    param(
+        [string]$SourceFile,
+        [switch]$SuppressSuccessMessage
+    )
 
     if (!(Test-Path $SourceFile)) {
         Write-ImportLog "Datei nicht gefunden: $SourceFile" 'ERROR'
@@ -144,251 +822,131 @@ function Start-InitialImport {
 
     Write-ImportLog "Starte Import aus $SourceFile ..." 'INFO'
 
-    if (Test-Path $DbPath) {
-        $backup = "db_verlegepaket_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
-        Copy-Item -Path $DbPath -Destination (Join-Path $BackupDir $backup) -Force
-        Write-ImportLog "Backup erstellt: $backup" 'INFO'
-    }
-
-    $data = $null
+    $csvData = $null
     try {
-        $data = Import-Csv -Path $SourceFile -Delimiter ';' -Encoding Default
-        Write-ImportLog "CSV geladen - $($data.Count) Zeilen gefunden" 'INFO'
+        $csvData = Load-CsvData -Path $SourceFile
+        Write-ImportLog "CSV geladen - $($csvData.Rows.Count) Zeilen gefunden (Encoding: $($csvData.EncodingName))" 'INFO'
     }
     catch {
         Write-ImportLog "CSV-Ladefehler: $($_.Exception.Message)" 'ERROR'
         return
     }
 
-    if ($null -eq $data -or $data.Count -eq 0) {
+    if ($null -eq $csvData.Rows -or $csvData.Rows.Count -eq 0) {
         Write-ImportLog 'Keine Datenzeilen' 'ERROR'
         return
     }
 
-    $headers = $data[0].PSObject.Properties.Name
+    $headers = @($csvData.Rows[0].PSObject.Properties.Name)
     Write-ImportLog "Header erkannt: $($headers -join ' | ')" 'INFO'
 
-    $idx = @{}
-    foreach ($col in $headers) {
-        $clean = $col.Trim() -replace '[äöüÄÖÜß]', '?'
+    $headerResolution = Resolve-HeaderMap -Headers $headers -Definitions (Get-HeaderDefinitions)
+    Write-ImportLog "Gefundene Headerzuordnung: $($headerResolution.HeaderMap.Keys -join ', ')" 'DEBUG'
 
-        if ($clean -match 'Materialnummer.*SASPF') { $idx['matnr_main'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^VersNr$') { $idx['supplynumber'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match 'Status.*MatNr') { $idx['mat_stat_main'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Dezent$') { $idx['dezentral'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Ext WG$') { $idx['ext_wg'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match 'Artikel Nr') { $idx['artnr'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Materialbezeichnung$') { $idx['description'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Bezeichnung Technik$') { $idx['technical'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Bemerkung$') { $idx['logistics'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^BZE$') { $idx['unit_main'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^TLG 74$') { $idx['quantity_target'] = [array]::IndexOf($headers, $col) }
-
-        if ($clean -match '^GefStoff Verlegung$') { $idx['GefStoff Verlegung'] = [array]::IndexOf($headers, $col) }
-        elseif ($clean -match '^GefStoff$') { $idx['is_dg'] = [array]::IndexOf($headers, $col) }
-
-        if ($clean -match '^Gefahrgut$') { $idx['Gefahrgut'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Batterie$') { $idx['Batterie'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Flight$') { $idx['Flight'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Waffen$') { $idx['Waffen'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Munition$') { $idx['Munition'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^RTS$') { $idx['RTS'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^AUG$') { $idx['AUG'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^WEF$') { $idx['WEF'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^BoGe$') { $idx['BoGe'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^HFT$') { $idx['HFT'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^LME$') { $idx['LME'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^REG$') { $idx['REG'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^RNW$') { $idx['RNW'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Rad Reifen Shop$') { $idx['Rad Reifen Shop'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^IETPX Material$') { $idx['IETPX Material'] = [array]::IndexOf($headers, $col) }
-
-        if ($clean -match '^GUN ON AC$') { $idx['GUN ON AC'] = [array]::IndexOf($headers, $col) }
-        elseif ($clean -match '^GUN OFF AC$') { $idx['GUN OFF AC'] = [array]::IndexOf($headers, $col) }
-        elseif ($clean -match '^GUN$') { $idx['GUN'] = [array]::IndexOf($headers, $col) }
-
-        if ($clean -match '^IRIS-T$') { $idx['IRIS-T'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^FLARE$') { $idx['FLARE'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^AIM 120$') { $idx['AIM 120'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^1000 l SFT$') { $idx['1000 l SFT'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^GBU 48$') { $idx['GBU 48'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^Meteor$') { $idx['Meteor'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^LDP$') { $idx['LDP'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^IWP$') { $idx['IWP'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^CFP$') { $idx['CFP'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^MFRL$') { $idx['MFRL'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^OWP$') { $idx['OWP'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^CHAFF$') { $idx['CHAFF'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^MEL$') { $idx['MEL'] = [array]::IndexOf($headers, $col) }
-        if ($clean -match '^ITSPL$') { $idx['ITSPL'] = [array]::IndexOf($headers, $col) }
-    }
-
-    Write-ImportLog "Gefundene Indizes: $($idx.Keys -join ', ')" 'DEBUG'
-
-    if (-not $idx.ContainsKey('matnr_main')) {
-        Write-ImportLog 'Kritischer Fehler: matnr_main nicht gefunden!' 'ERROR'
+    if ($headerResolution.MissingRequired.Count -gt 0) {
+        Write-ImportLog "Kritischer Fehler: Pflichtspalten fehlen: $($headerResolution.MissingRequired -join ', ')" 'ERROR'
         return
     }
 
-    $materials = @()
-    $maxId = 999
-
-    if (Test-Path $DbPath) {
-        try {
-            $oldDb = Get-Content -Path $DbPath -Encoding UTF8 | ConvertFrom-Json
-            $maxId = ($oldDb | ForEach-Object { [int]$_.material_class.id } | Measure-Object -Maximum).Maximum
-            if (!$maxId) { $maxId = 999 }
-        }
-        catch {
-            Write-ImportLog 'Alte DB nicht lesbar - starte bei 1000' 'WARNING'
-        }
+    if ($headerResolution.MissingOptional.Count -gt 0) {
+        Write-ImportLog "Optionale Spalten fehlen: $($headerResolution.MissingOptional -join ', ')" 'WARNING'
     }
 
-    $lineNum = 2
-    foreach ($row in $data) {
-        $lineNum++
+    $duplicateKeys = Test-DuplicateImportKeys -Rows $csvData.Rows -HeaderMap $headerResolution.HeaderMap
+    if ($duplicateKeys.Count -gt 0) {
+        foreach ($duplicate in $duplicateKeys) {
+            Write-ImportLog "Doppelte CSV-Schluessel gefunden: $duplicate" 'ERROR'
+        }
+        Write-ImportLog 'Import abgebrochen - doppelte matnr_main-Werte im CSV' 'ERROR'
+        return
+    }
 
-        $matnr = Get-CellValue -Row $row -IndexMap $idx -Key 'matnr_main'
-        if ([string]::IsNullOrWhiteSpace($matnr)) {
-            Write-ImportLog "Zeile $lineNum - matnr_main leer, uebersprungen" 'WARNING'
+    $existingDb = $null
+    try {
+        $existingDb = Load-ExistingDatabase -Path $DbPath
+        Write-ImportLog "Vorhandene Datenbank geladen - $($existingDb.Materials.Count) Materialien" 'INFO'
+    }
+    catch {
+        Write-ImportLog "Vorhandene Datenbank nicht lesbar: $($_.Exception.Message)" 'ERROR'
+        return
+    }
+
+    $materials = New-Object System.Collections.Generic.List[object]
+    foreach ($material in $existingDb.Materials) {
+        [void]$materials.Add($material)
+    }
+
+    $lookup = @{}
+    foreach ($key in $existingDb.Lookup.Keys) {
+        $lookup[$key] = $existingDb.Lookup[$key]
+    }
+
+    $nextId = [int]$existingDb.MaxId
+    $insertedCount = 0
+    $updatedCount = 0
+    $skippedCount = 0
+    $warningCount = 0
+    $errorCount = 0
+
+    for ($index = 0; $index -lt $csvData.Rows.Count; $index++) {
+        $rowNumber = $index + 2
+        $row = $csvData.Rows[$index]
+        $matnr = Get-CellValue -Row $row -HeaderMap $headerResolution.HeaderMap -Key 'matnr_main'
+        $existingMaterial = $null
+        if ($lookup.ContainsKey($matnr)) {
+            $existingMaterial = $materials[$lookup[$matnr]]
+        }
+
+        $importData = Convert-RowToImportData -Row $row -HeaderMap $headerResolution.HeaderMap -RowNumber $rowNumber -ExistingMaterial $existingMaterial
+        foreach ($warning in $importData.Warnings) {
+            Write-ImportLog $warning 'WARNING'
+            $warningCount++
+        }
+
+        if ($importData.ShouldSkip) {
+            $skippedCount++
             continue
         }
 
-        $desc = Get-CellValue -Row $row -IndexMap $idx -Key 'description'
-        $supply = Get-CellValue -Row $row -IndexMap $idx -Key 'supplynumber'
-        $matStat = Get-CellValue -Row $row -IndexMap $idx -Key 'mat_stat_main'
-        $dezentRaw = Get-CellValue -Row $row -IndexMap $idx -Key 'dezentral'
-        $extWg = Get-CellValue -Row $row -IndexMap $idx -Key 'ext_wg'
-        $artNr = Get-CellValue -Row $row -IndexMap $idx -Key 'artnr'
-        $technical = Get-CellValue -Row $row -IndexMap $idx -Key 'technical'
-        $logistics = Get-CellValue -Row $row -IndexMap $idx -Key 'logistics'
-        $unitMain = Get-CellValue -Row $row -IndexMap $idx -Key 'unit_main'
-        $qtyTargetRaw = Get-CellValue -Row $row -IndexMap $idx -Key 'quantity_target'
-        $isDgRaw = Get-CellValue -Row $row -IndexMap $idx -Key 'is_dg'
-
-        $qtyTarget = 0.0
-        $parsed = 0.0
-        $culture = [System.Globalization.CultureInfo]::GetCultureInfo('de-DE')
-        if ([string]::IsNullOrWhiteSpace($qtyTargetRaw) -eq $false) {
-            [void][double]::TryParse($qtyTargetRaw.Trim(), [System.Globalization.NumberStyles]::Any, $culture, [ref]$parsed)
-            $qtyTarget = $parsed
+        if ($existingMaterial) {
+            $id = [int]$existingMaterial.material_class.id
+            $mergedRecord = Merge-MaterialRecord -ImportData $importData -ExistingMaterial $existingMaterial -Id $id
+            $materials[$lookup[$matnr]] = $mergedRecord
+            $updatedCount++
+            Write-ImportLog "Zeile $rowNumber - aktualisiert: $matnr (ID $id)" 'INFO'
         }
-
-        $dangerousTags = @()
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'GefStoff Verlegung') { $dangerousTags += 'GefStoff Verlegung' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'Gefahrgut') { $dangerousTags += 'Gefahrgut' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'Batterie') { $dangerousTags += 'Batterie' }
-
-        $wtgWaStff = @()
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'Flight' -Pattern '^[xX]$') { $wtgWaStff += 'Flight' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'Waffen' -Pattern '^[xX]$') { $wtgWaStff += 'Waffen' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'Munition' -Pattern '^[xX]$') { $wtgWaStff += 'Munition' }
-
-        $instElo = @()
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'RTS' -Pattern '^[xX]$') { $instElo += 'RTS' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'AUG' -Pattern '^[xX]$') { $instElo += 'AUG' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'WEF' -Pattern '^[xX]$') { $instElo += 'WEF' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'BoGe' -Pattern '^[xX]$') { $instElo += 'BoGe' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'HFT' -Pattern '^[xX]$') { $instElo += 'HFT' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'LME' -Pattern '^[xX]$') { $instElo += 'LME' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'REG' -Pattern '^[xX]$') { $instElo += 'REG' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'RNW' -Pattern '^[xX]$') { $instElo += 'RNW' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'Rad Reifen Shop' -Pattern '^[xX]$') { $instElo += 'Rad Reifen Shop' }
-
-        $miscTags = @()
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'IETPX Material') { $miscTags += 'IETPX Material' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'GUN') { $miscTags += 'GUN' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'GUN ON AC') { $miscTags += 'GUN ON AC' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'GUN OFF AC') { $miscTags += 'GUN OFF AC' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'IRIS-T') { $miscTags += 'IRIS-T' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'FLARE') { $miscTags += 'FLARE' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'AIM 120') { $miscTags += 'AIM 120' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key '1000 l SFT') { $miscTags += '1000 l SFT' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'GBU 48') { $miscTags += 'GBU 48' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'Meteor') { $miscTags += 'Meteor' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'LDP') { $miscTags += 'LDP' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'IWP') { $miscTags += 'IWP' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'CFP') { $miscTags += 'CFP' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'MFRL') { $miscTags += 'MFRL' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'OWP') { $miscTags += 'OWP' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'CHAFF') { $miscTags += 'CHAFF' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'MEL') { $miscTags += 'MEL' }
-        if (Test-Flag -Row $row -IndexMap $idx -Key 'ITSPL') { $miscTags += 'ITSPL' }
-
-        $matStatValue = 'XX'
-        if (-not [string]::IsNullOrWhiteSpace($matStat)) {
-            $trimmedMatStat = $matStat.Trim()
-            if ($trimmedMatStat.Length -eq 2) {
-                $matStatValue = $trimmedMatStat
-            }
+        else {
+            $nextId++
+            $newRecord = Merge-MaterialRecord -ImportData $importData -Id $nextId
+            [void]$materials.Add($newRecord)
+            $lookup[$matnr] = $materials.Count - 1
+            $insertedCount++
+            Write-ImportLog "Zeile $rowNumber - importiert: $matnr (ID $nextId)" 'INFO'
         }
-
-        $dezentralValue = ''
-        if (-not [string]::IsNullOrWhiteSpace($dezentRaw)) {
-            $dezentCandidate = $dezentRaw.Trim().ToLowerInvariant()
-            if ($dezentCandidate -eq 'true') {
-                $dezentralValue = $true
-            }
-            elseif ($dezentCandidate -eq 'false') {
-                $dezentralValue = $false
-            }
-        }
-
-        $isDgValue = $false
-        if (-not [string]::IsNullOrWhiteSpace($isDgRaw) -and $isDgRaw.Trim() -eq '1') {
-            $isDgValue = $true
-        }
-
-        $natoStockNumber = ''
-        $trimmedMatnr = $matnr.Trim()
-        $supplyDigits = ''
-        if (-not [string]::IsNullOrWhiteSpace($supply)) {
-            $supplyDigits = ($supply -replace '[^0-9]', '')
-        }
-        if ($trimmedMatnr -match '^\d+$' -and $supplyDigits -and $trimmedMatnr -eq $supplyDigits) {
-            $natoStockNumber = $trimmedMatnr
-        }
-
-        $obj = New-MaterialRecord `
-            -Id (++$maxId) `
-            -MatnrMain $matnr.TrimEnd() `
-            -Description $desc `
-            -NatoStockNumber $natoStockNumber `
-            -SupplyNumber $supply `
-            -MatStatMain $matStatValue `
-            -ExtWg $extWg `
-            -Dezentral $dezentralValue `
-            -ArtNr $artNr `
-            -Creditor '' `
-            -IsDg $isDgValue `
-            -UnNum '' `
-            -DangerousTags $dangerousTags `
-            -UnitMain $unitMain `
-            -QuantityTarget $qtyTarget `
-            -AltUnits @() `
-            -AltMaterial @() `
-            -WtgWaStff $wtgWaStff `
-            -InstElo $instElo `
-            -Logistics $logistics `
-            -Technical $technical `
-            -MiscTags $miscTags
-
-        $materials += $obj
-        Write-ImportLog "Zeile $lineNum - importiert: $matnr (ID $maxId)" 'INFO'
     }
 
     try {
-        $materials | ConvertTo-Json -Depth 10 | Out-File -FilePath $DbPath -Encoding UTF8
+        $backupPath = Backup-DatabaseFile -Path $DbPath
+        if ($backupPath) {
+            Write-ImportLog "Backup erstellt: $(Split-Path $backupPath -Leaf)" 'INFO'
+        }
+
+        Save-DatabaseFile -Path $DbPath -Materials $materials.ToArray()
         Write-ImportLog "Import abgeschlossen - $($materials.Count) Materialien gespeichert" 'SUCCESS'
-        [System.Windows.Forms.MessageBox]::Show("Import abgeschlossen!`n$($materials.Count) Eintraege`nLog: $LogFile", 'Erfolg', 'OK', 'Information')
+        Write-ImportLog "Zusammenfassung: Neu=$insertedCount, Aktualisiert=$updatedCount, Uebersprungen=$skippedCount, Warnungen=$warningCount, Fehler=$errorCount" 'INFO'
+
+        if (-not $SuppressSuccessMessage) {
+            [System.Windows.Forms.MessageBox]::Show("Import abgeschlossen!`nNeu: $insertedCount`nAktualisiert: $updatedCount`nUebersprungen: $skippedCount`nWarnungen: $warningCount`nLog: $LogFile", 'Erfolg', 'OK', 'Information')
+        }
     }
     catch {
+        $errorCount++
         Write-ImportLog "Fehler beim Speichern der JSON: $($_.Exception.Message)" 'ERROR'
     }
 }
 
-# GUI - WPF Modern Design
-$xaml = @"
+function Start-ImportToolUi {
+    $xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Initial-Import Verlegepaket (PS 5.1)"
@@ -400,14 +958,12 @@ $xaml = @"
         FontSize="11">
     <Grid>
         <StackPanel Margin="20">
-            <!-- Header -->
-            <TextBlock Text="Verlegepaket Datenimport" 
-                       FontSize="24" 
-                       FontWeight="Bold" 
+            <TextBlock Text="Verlegepaket Datenimport"
+                       FontSize="24"
+                       FontWeight="Bold"
                        Foreground="#2C3E50"
                        Margin="0,0,0,10"/>
 
-            <!-- File Selection Section -->
             <Border BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="5" Padding="15" Background="White" Margin="0,0,0,15">
                 <StackPanel>
                     <TextBlock Text="Quelldatei" FontWeight="Bold" Foreground="#34495E"/>
@@ -416,19 +972,19 @@ $xaml = @"
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="110"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="txtFile" 
+                        <TextBox x:Name="txtFile"
                                  Grid.Column="0"
-                                 Padding="10" 
-                                 Background="White" 
-                                 BorderThickness="1" 
+                                 Padding="10"
+                                 Background="White"
+                                 BorderThickness="1"
                                  BorderBrush="#BDC3C7"
                                  IsReadOnly="True"
                                  Foreground="#7F8C8D"/>
-                        <Button Content="Durchsuchen..." 
+                        <Button Content="Durchsuchen..."
                                 Grid.Column="1"
                                 Margin="10,0,0,0"
                                 x:Name="btnBrowse"
-                                Background="#3498DB" 
+                                Background="#3498DB"
                                 Foreground="White"
                                 FontWeight="Bold"
                                 Cursor="Hand"
@@ -437,10 +993,9 @@ $xaml = @"
                 </StackPanel>
             </Border>
 
-            <!-- Import Button -->
-            <Button Content="Import starten" 
+            <Button Content="Import starten"
                     x:Name="btnImport"
-                    Background="#27AE60" 
+                    Background="#27AE60"
                     Foreground="White"
                     FontWeight="Bold"
                     FontSize="13"
@@ -449,14 +1004,13 @@ $xaml = @"
                     Cursor="Hand"
                     Margin="0,0,0,15"/>
 
-            <!-- Log Section -->
             <Border BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="5" Padding="15" Background="White">
                 <StackPanel>
                     <TextBlock Text="Importprotokoll" FontWeight="Bold" Foreground="#34495E"/>
-                    <TextBox x:Name="txtLog" 
+                    <TextBox x:Name="txtLog"
                              Height="450"
                              Padding="10"
-                             Background="#ECF0F1" 
+                             Background="#ECF0F1"
                              Foreground="#2C3E50"
                              FontFamily="Consolas"
                              FontSize="10"
@@ -473,41 +1027,42 @@ $xaml = @"
 </Window>
 "@
 
-# Load XAML
-$reader = New-Object System.Xml.XmlNodeReader([xml]$xaml)
-$window = [Windows.Markup.XamlReader]::Load($reader)
+    $reader = New-Object System.Xml.XmlNodeReader([xml]$xaml)
+    $window = [Windows.Markup.XamlReader]::Load($reader)
 
-# Get controls
-$txtFile = $window.FindName("txtFile")
-$btnBrowse = $window.FindName("btnBrowse")
-$btnImport = $window.FindName("btnImport")
-$txtLog = $window.FindName("txtLog")
+    $txtFile = $window.FindName('txtFile')
+    $btnBrowse = $window.FindName('btnBrowse')
+    $btnImport = $window.FindName('btnImport')
+    $txtLog = $window.FindName('txtLog')
 
-$global:LogBox = $txtLog
+    $global:LogBox = $txtLog
 
-# Browse button click
-$btnBrowse.Add_Click({
-        $ofd = New-Object System.Windows.Forms.OpenFileDialog
-        $ofd.Filter = 'CSV/Text-Dateien (*.csv;*.txt)|*.csv;*.txt|Alle Dateien (*.*)|*.*'
-        if ($ofd.ShowDialog() -eq 'OK') {
-            $txtFile.Text = $ofd.FileName
-        }
-    })
+    $btnBrowse.Add_Click({
+            $ofd = New-Object System.Windows.Forms.OpenFileDialog
+            $ofd.Filter = 'CSV/Text-Dateien (*.csv;*.txt)|*.csv;*.txt|Alle Dateien (*.*)|*.*'
+            if ($ofd.ShowDialog() -eq 'OK') {
+                $txtFile.Text = $ofd.FileName
+            }
+        })
 
-# Import button click
-$btnImport.Add_Click({
-        if ([string]::IsNullOrWhiteSpace($txtFile.Text)) {
-            [System.Windows.MessageBox]::Show('Bitte eine Datei auswaehlen!', 'Hinweis', 'OK', 'Warning')
-            return
-        }
+    $btnImport.Add_Click({
+            if ([string]::IsNullOrWhiteSpace($txtFile.Text)) {
+                [System.Windows.MessageBox]::Show('Bitte eine Datei auswaehlen!', 'Hinweis', 'OK', 'Warning')
+                return
+            }
 
-        $btnImport.IsEnabled = $false
-        Start-InitialImport -SourceFile $txtFile.Text
-        $btnImport.IsEnabled = $true
-    })
+            $btnImport.IsEnabled = $false
+            Start-InitialImport -SourceFile $txtFile.Text
+            $btnImport.IsEnabled = $true
+        })
 
-Write-ImportLog "Tool gestartet - $(Get-Date -Format 'dd.MM.yyyy HH:mm:ss')" 'INFO'
-Write-ImportLog "Logdatei: $LogFile" 'INFO'
-Write-ImportLog "Datenbank: $DbPath" 'INFO'
+    Write-ImportLog "Tool gestartet - $(Get-Date -Format 'dd.MM.yyyy HH:mm:ss')" 'INFO'
+    Write-ImportLog "Logdatei: $LogFile" 'INFO'
+    Write-ImportLog "Datenbank: $DbPath" 'INFO'
 
-$window.ShowDialog() | Out-Null
+    $window.ShowDialog() | Out-Null
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    Start-ImportToolUi
+}
