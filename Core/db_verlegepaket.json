@@ -1,0 +1,478 @@
+﻿[
+    {
+        "material_class":  {
+                               "id":  1009,
+                               "matnr_main":  "121265350",
+                               "description":  "Pin, Spring",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "5315-12-126-5350",
+                               "mat_stat_main":  "XX",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "09.02",
+                                                                       "dezentral":  false,
+                                                                       "artnr":  "",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  false,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  2,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+                                                                 "Waffen"
+                                                             ],
+                                               "Inst/Elo":  [
+
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "",
+                                                "technical":  "Brech Cylinder Housing"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+                                                         "IETPX Material",
+                                                         "GUN",
+                                                         "GUN OFF AC"
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1010,
+                               "matnr_main":  "121909027",
+                               "description":  "BATTERIE, WIEDERAUFLDB.; 100Ah; 12V",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "6140-12-190-9027",
+                               "mat_stat_main":  "XX",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "09.02",
+                                                                       "dezentral":  false,
+                                                                       "artnr":  "",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  true,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+                                                                                      "GefStoff Verlegung",
+                                                                                      "Batterie"
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  2,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+
+                                                             ],
+                                               "Inst/Elo":  [
+                                                                "BoGe"
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "GefGut Batterie Blei-Batterie, wiederaufladbar",
+                                                "technical":  "Batterie 12V 100 Ah fÃ¼r MIL Power"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1011,
+                               "matnr_main":  "123736735",
+                               "description":  "SCHRAUBE MIT KOPF",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "5306-12-373-6735",
+                               "mat_stat_main":  "XX",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "09.02",
+                                                                       "dezentral":  false,
+                                                                       "artnr":  "",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  false,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  12,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+
+                                                             ],
+                                               "Inst/Elo":  [
+                                                                "LME"
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "",
+                                                "technical":  "Schraube HP5 Valve 6x pro TWK"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1012,
+                               "matnr_main":  "011300000XX0301:D3309:1",
+                               "description":  "DIGITAL ENGINE CONTROL AND MONITORING UN",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "2925-12-373-3249",
+                               "mat_stat_main":  "XX",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "09.02",
+                                                                       "dezentral":  false,
+                                                                       "artnr":  "",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  false,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  2,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+
+                                                             ],
+                                               "Inst/Elo":  [
+                                                                "LME"
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "",
+                                                "technical":  "Tranche 2 Twk DECMU"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+                                                         "IETPX Material"
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1013,
+                               "matnr_main":  "Art.-Nr.: 4749",
+                               "description":  "3M Cleaner Spray Typ 50098",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "dezentral",
+                               "mat_stat_main":  "11",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "dezentral",
+                                                                       "dezentral":  true,
+                                                                       "artnr":  "Art.-Nr.: 4749",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  true,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+                                                                                      "GefStoff Verlegung",
+                                                                                      "Gefahrgut"
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  1,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+
+                                                             ],
+                                               "Inst/Elo":  [
+                                                                "WEF"
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "Art.-Nr.: 4749",
+                                                "technical":  "74-GefG-006"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1014,
+                               "matnr_main":  "Art.-Nr.: 5039000-032001.000.0",
+                               "description":  "Saugfilter, vollst.",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "dezentral",
+                               "mat_stat_main":  "11",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "dezentral",
+                                                                       "dezentral":  true,
+                                                                       "artnr":  "Reihnmetall Art.-Nr.: 5039000-032001.000.0",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  false,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  1,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+
+                                                             ],
+                                               "Inst/Elo":  [
+                                                                "BoGe"
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "dez. Reihnmetall MSU (MPO 172000010 VN 1720-12-387-5942) / Dezentral, sollte aber ins Standard VP (MatStamm erstellen)",
+                                                "technical":  "MSU"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1015,
+                               "matnr_main":  "DIN1481-1,5X8:D8286:1",
+                               "description":  "STIFT, SPANN-",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "5315-12-138-5444",
+                               "mat_stat_main":  "XX",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "09.02",
+                                                                       "dezentral":  false,
+                                                                       "artnr":  "",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  false,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  20,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+                                                                 "Waffen"
+                                                             ],
+                                               "Inst/Elo":  [
+
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "Wird benÃ¶tigt",
+                                                "technical":  "Gas Cylinder"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+                                                         "IETPX Material",
+                                                         "GUN",
+                                                         "GUN OFF AC"
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1016,
+                               "matnr_main":  "ISO8752-5X26-N-ST:I9008:1",
+                               "description":  "STIFT, SPANN-",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "5315-12-146-9789",
+                               "mat_stat_main":  "10",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "dezentral",
+                                                                       "dezentral":  false,
+                                                                       "artnr":  "",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  false,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  10,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+                                                                 "Waffen"
+                                                             ],
+                                               "Inst/Elo":  [
+
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "",
+                                                "technical":  ""
+                                            },
+                               "misc":  {
+                                            "tags":  [
+                                                         "IETPX Material",
+                                                         "GUN",
+                                                         "GUN OFF AC"
+                                                     ]
+                                        }
+                           }
+    },
+    {
+        "material_class":  {
+                               "id":  1017,
+                               "matnr_main":  "NN60945G01:8338B:1",
+                               "description":  "KABELBAUM, VERZWEIG",
+                               "nato_stock_number":  "",
+                               "supplynumber":  "6150-33-206-0763",
+                               "mat_stat_main":  "XX",
+                               "properties":  {
+                                                  "productgroup":  {
+                                                                       "ext_wg":  "09.02",
+                                                                       "dezentral":  false,
+                                                                       "artnr":  "",
+                                                                       "creditor":  ""
+                                                                   },
+                                                  "dangerous_good":  {
+                                                                         "is_dg":  false,
+                                                                         "un_num":  "",
+                                                                         "tags":  [
+
+                                                                                  ]
+                                                                     },
+                                                  "quantity":  {
+                                                                   "unit_main":  "EA",
+                                                                   "quantity_target":  1,
+                                                                   "alt_units":  [
+
+                                                                                 ]
+                                                               }
+                                              },
+                               "alt_material":  [
+
+                                                ],
+                               "mat_ref":  {
+                                               "WtgWaStff":  [
+
+                                                             ],
+                                               "Inst/Elo":  [
+                                                                "LME"
+                                                            ]
+                                           },
+                               "comments":  {
+                                                "logistics":  "",
+                                                "technical":  "Tranche 2 G-Loom ENG"
+                                            },
+                               "misc":  {
+                                            "tags":  [
+                                                         "IETPX Material"
+                                                     ]
+                                        }
+                           }
+    }
+]
