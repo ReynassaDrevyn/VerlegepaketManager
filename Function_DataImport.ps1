@@ -248,7 +248,7 @@ function Import-DelimitedCsvText {
     return @($Text | ConvertFrom-Csv -Delimiter $Delimiter)
 }
 
-function Load-CsvData {
+function Import-CsvData {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     $fileData = Read-TextFileWithEncodingFallback -Path $Path
@@ -260,7 +260,7 @@ function Load-CsvData {
     }
 }
 
-function Try-ParseImportBoolean {
+function ConvertTo-ImportBooleanParseResult {
     param([AllowNull()][string]$Value)
 
     $text = Get-NormalizedString $Value
@@ -287,11 +287,11 @@ function Test-Flag {
         [Parameter(Mandatory = $true)][string]$Key
     )
 
-    $parsed = Try-ParseImportBoolean (Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key $Key)
+    $parsed = ConvertTo-ImportBooleanParseResult (Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key $Key)
     return $parsed.Success -and $parsed.Value
 }
 
-function Try-ParseImportNumber {
+function ConvertTo-ImportNumberParseResult {
     param([AllowNull()][string]$Value)
 
     $text = Get-NormalizedString $Value
@@ -381,7 +381,7 @@ function Get-NextMaterialId {
     return $maxId
 }
 
-function Load-ExistingDatabase {
+function Read-ExistingDatabase {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     if (-not (Test-Path $Path)) {
@@ -589,7 +589,7 @@ function Convert-RowToImportData {
 
     if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key 'quantity_target') {
         $qtyRaw = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'quantity_target'
-        $qtyParse = Try-ParseImportNumber $qtyRaw
+        $qtyParse = ConvertTo-ImportNumberParseResult $qtyRaw
         $quantityTarget = $qtyParse.Value
         if (-not $qtyParse.Success) {
             if ($ExistingMaterial) {
@@ -612,7 +612,7 @@ function Convert-RowToImportData {
 
     if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key 'dezentral') {
         $dezentRaw = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'dezentral'
-        $dezentParse = Try-ParseImportBoolean $dezentRaw
+        $dezentParse = ConvertTo-ImportBooleanParseResult $dezentRaw
         $dezentralValue = $false
         if ($dezentParse.Success) {
             $dezentralValue = [bool]$dezentParse.Value
@@ -636,7 +636,7 @@ function Convert-RowToImportData {
 
     if (Test-HeaderAvailable -HeaderMap $HeaderMap -Key 'is_dg') {
         $isDgRaw = Get-CellValue -Row $Row -HeaderMap $HeaderMap -Key 'is_dg'
-        $isDgParse = Try-ParseImportBoolean $isDgRaw
+        $isDgParse = ConvertTo-ImportBooleanParseResult $isDgRaw
         $explicitIsDg = $false
         if ($isDgParse.Success) {
             $explicitIsDg = [bool]$isDgParse.Value
@@ -824,7 +824,7 @@ function Start-InitialImport {
 
     $csvData = $null
     try {
-        $csvData = Load-CsvData -Path $SourceFile
+        $csvData = Import-CsvData -Path $SourceFile
         Write-ImportLog "CSV geladen - $($csvData.Rows.Count) Zeilen gefunden (Encoding: $($csvData.EncodingName))" 'INFO'
     }
     catch {
@@ -863,7 +863,7 @@ function Start-InitialImport {
 
     $existingDb = $null
     try {
-        $existingDb = Load-ExistingDatabase -Path $DbPath
+        $existingDb = Read-ExistingDatabase -Path $DbPath
         Write-ImportLog "Vorhandene Datenbank geladen - $($existingDb.Materials.Count) Materialien" 'INFO'
     }
     catch {
