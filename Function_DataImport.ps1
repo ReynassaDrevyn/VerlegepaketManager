@@ -1,8 +1,10 @@
 # Function_DataImport.ps1
 # Windows-PowerShell-5.1-kompatible Importversion
 
+Add-Type -AssemblyName PresentationFramework
+Add-Type -AssemblyName PresentationCore
+Add-Type -AssemblyName WindowsBase
 Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
 
 # Konfiguration
 $ProjectRoot = $(if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path $MyInvocation.MyCommand.Path -Parent })
@@ -29,7 +31,12 @@ function Write-ImportLog {
     Add-Content -Path $LogFile -Value $logLine -Encoding UTF8 -ErrorAction SilentlyContinue
     if ($global:LogBox) {
         $global:LogBox.AppendText("$logLine`r`n")
-        $global:LogBox.ScrollToCaret()
+        if ($global:LogBox -is [System.Windows.Controls.TextBox]) {
+            $global:LogBox.ScrollToEnd()
+        }
+        else {
+            $global:LogBox.ScrollToCaret()
+        }
     }
 }
 
@@ -380,28 +387,105 @@ function Start-InitialImport {
     }
 }
 
-# GUI
-$form = New-Object System.Windows.Forms.Form
-$form.Text = 'Initial-Import Verlegepaket (PS 5.1)'
-$form.Size = New-Object System.Drawing.Size(780, 620)
-$form.StartPosition = 'CenterScreen'
-$form.FormBorderStyle = 'FixedSingle'
+# GUI - WPF Modern Design
+$xaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Initial-Import Verlegepaket (PS 5.1)"
+        Height="700"
+        Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5"
+        FontFamily="Segoe UI"
+        FontSize="11">
+    <Grid>
+        <StackPanel Margin="20">
+            <!-- Header -->
+            <TextBlock Text="Verlegepaket Datenimport" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Foreground="#2C3E50"
+                       Margin="0,0,0,10"/>
 
-$lblFile = New-Object System.Windows.Forms.Label
-$lblFile.Text = 'Quelldatei:'
-$lblFile.Location = New-Object System.Drawing.Point(12, 18)
-$form.Controls.Add($lblFile)
+            <!-- File Selection Section -->
+            <Border BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="5" Padding="15" Background="White" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="Quelldatei" FontWeight="Bold" Foreground="#34495E"/>
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="110"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="txtFile" 
+                                 Grid.Column="0"
+                                 Padding="10" 
+                                 Background="White" 
+                                 BorderThickness="1" 
+                                 BorderBrush="#BDC3C7"
+                                 IsReadOnly="True"
+                                 Foreground="#7F8C8D"/>
+                        <Button Content="Durchsuchen..." 
+                                Grid.Column="1"
+                                Margin="10,0,0,0"
+                                x:Name="btnBrowse"
+                                Background="#3498DB" 
+                                Foreground="White"
+                                FontWeight="Bold"
+                                Cursor="Hand"
+                                Padding="10"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
 
-$txtFile = New-Object System.Windows.Forms.TextBox
-$txtFile.Location = New-Object System.Drawing.Point(100, 15)
-$txtFile.Size = New-Object System.Drawing.Size(550, 24)
-$txtFile.ReadOnly = $true
-$form.Controls.Add($txtFile)
+            <!-- Import Button -->
+            <Button Content="Import starten" 
+                    x:Name="btnImport"
+                    Background="#27AE60" 
+                    Foreground="White"
+                    FontWeight="Bold"
+                    FontSize="13"
+                    Padding="15,12"
+                    Height="45"
+                    Cursor="Hand"
+                    Margin="0,0,0,15"/>
 
-$btnBrowse = New-Object System.Windows.Forms.Button
-$btnBrowse.Text = 'Durchsuchen...'
-$btnBrowse.Location = New-Object System.Drawing.Point(660, 14)
-$btnBrowse.Size = New-Object System.Drawing.Size(100, 28)
+            <!-- Log Section -->
+            <Border BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="5" Padding="15" Background="White">
+                <StackPanel>
+                    <TextBlock Text="Importprotokoll" FontWeight="Bold" Foreground="#34495E"/>
+                    <TextBox x:Name="txtLog" 
+                             Height="450"
+                             Padding="10"
+                             Background="#ECF0F1" 
+                             Foreground="#2C3E50"
+                             FontFamily="Consolas"
+                             FontSize="10"
+                             IsReadOnly="True"
+                             VerticalScrollBarVisibility="Auto"
+                             TextWrapping="Wrap"
+                             BorderThickness="1"
+                             BorderBrush="#BDC3C7"
+                             Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>
+"@
+
+# Load XAML
+$reader = New-Object System.Xml.XmlNodeReader([xml]$xaml)
+$window = [Windows.Markup.XamlReader]::Load($reader)
+
+# Get controls
+$txtFile = $window.FindName("txtFile")
+$btnBrowse = $window.FindName("btnBrowse")
+$btnImport = $window.FindName("btnImport")
+$txtLog = $window.FindName("txtLog")
+
+$global:LogBox = $txtLog
+
+# Browse button click
 $btnBrowse.Add_Click({
         $ofd = New-Object System.Windows.Forms.OpenFileDialog
         $ofd.Filter = 'CSV/Text-Dateien (*.csv;*.txt)|*.csv;*.txt|Alle Dateien (*.*)|*.*'
@@ -409,39 +493,21 @@ $btnBrowse.Add_Click({
             $txtFile.Text = $ofd.FileName
         }
     })
-$form.Controls.Add($btnBrowse)
 
-$btnImport = New-Object System.Windows.Forms.Button
-$btnImport.Text = 'Import starten'
-$btnImport.Location = New-Object System.Drawing.Point(12, 50)
-$btnImport.Size = New-Object System.Drawing.Size(180, 40)
-$btnImport.BackColor = [System.Drawing.Color]::LightGreen
+# Import button click
 $btnImport.Add_Click({
         if ([string]::IsNullOrWhiteSpace($txtFile.Text)) {
-            [System.Windows.Forms.MessageBox]::Show('Bitte eine Datei auswaehlen!', 'Hinweis', 'OK', 'Warning')
+            [System.Windows.MessageBox]::Show('Bitte eine Datei auswaehlen!', 'Hinweis', 'OK', 'Warning')
             return
         }
 
-        $btnImport.Enabled = $false
+        $btnImport.IsEnabled = $false
         Start-InitialImport -SourceFile $txtFile.Text
-        $btnImport.Enabled = $true
+        $btnImport.IsEnabled = $true
     })
-$form.Controls.Add($btnImport)
-
-$txtLog = New-Object System.Windows.Forms.TextBox
-$txtLog.Multiline = $true
-$txtLog.ScrollBars = 'Vertical'
-$txtLog.ReadOnly = $true
-$txtLog.BackColor = [System.Drawing.Color]::White
-$txtLog.Location = New-Object System.Drawing.Point(12, 100)
-$txtLog.Size = New-Object System.Drawing.Size(740, 460)
-$txtLog.Font = New-Object System.Drawing.Font('Consolas', 9)
-$form.Controls.Add($txtLog)
-
-$global:LogBox = $txtLog
 
 Write-ImportLog "Tool gestartet - $(Get-Date -Format 'dd.MM.yyyy HH:mm:ss')" 'INFO'
 Write-ImportLog "Logdatei: $LogFile" 'INFO'
 Write-ImportLog "Datenbank: $DbPath" 'INFO'
 
-$form.ShowDialog() | Out-Null
+$window.ShowDialog() | Out-Null

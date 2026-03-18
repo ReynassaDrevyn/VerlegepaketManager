@@ -1,7 +1,7 @@
 ﻿[
     {
         "material_class":  {
-                               "id":  1009,
+                               "id":  1018,
                                "matnr_main":  "121265350",
                                "description":  "Pin, Spring",
                                "nato_stock_number":  "",
@@ -55,7 +55,7 @@
     },
     {
         "material_class":  {
-                               "id":  1010,
+                               "id":  1019,
                                "matnr_main":  "121909027",
                                "description":  "BATTERIE, WIEDERAUFLDB.; 100Ah; 12V",
                                "nato_stock_number":  "",
@@ -108,7 +108,7 @@
     },
     {
         "material_class":  {
-                               "id":  1011,
+                               "id":  1020,
                                "matnr_main":  "123736735",
                                "description":  "SCHRAUBE MIT KOPF",
                                "nato_stock_number":  "",
@@ -160,7 +160,7 @@
     },
     {
         "material_class":  {
-                               "id":  1012,
+                               "id":  1021,
                                "matnr_main":  "011300000XX0301:D3309:1",
                                "description":  "DIGITAL ENGINE CONTROL AND MONITORING UN",
                                "nato_stock_number":  "",
@@ -212,7 +212,7 @@
     },
     {
         "material_class":  {
-                               "id":  1013,
+                               "id":  1022,
                                "matnr_main":  "Art.-Nr.: 4749",
                                "description":  "3M Cleaner Spray Typ 50098",
                                "nato_stock_number":  "",
@@ -265,7 +265,7 @@
     },
     {
         "material_class":  {
-                               "id":  1014,
+                               "id":  1023,
                                "matnr_main":  "Art.-Nr.: 5039000-032001.000.0",
                                "description":  "Saugfilter, vollst.",
                                "nato_stock_number":  "",
@@ -317,7 +317,7 @@
     },
     {
         "material_class":  {
-                               "id":  1015,
+                               "id":  1024,
                                "matnr_main":  "DIN1481-1,5X8:D8286:1",
                                "description":  "STIFT, SPANN-",
                                "nato_stock_number":  "",
@@ -371,7 +371,7 @@
     },
     {
         "material_class":  {
-                               "id":  1016,
+                               "id":  1025,
                                "matnr_main":  "ISO8752-5X26-N-ST:I9008:1",
                                "description":  "STIFT, SPANN-",
                                "nato_stock_number":  "",
@@ -425,7 +425,7 @@
     },
     {
         "material_class":  {
-                               "id":  1017,
+                               "id":  1026,
                                "matnr_main":  "NN60945G01:8338B:1",
                                "description":  "KABELBAUM, VERZWEIG",
                                "nato_stock_number":  "",
