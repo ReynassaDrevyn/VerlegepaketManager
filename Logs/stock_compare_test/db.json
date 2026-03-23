@@ -1,0 +1,69 @@
+﻿{
+    "schema_version":  2,
+    "lookup_file":  "db_lookups.json",
+    "materials":  [
+                      {
+                          "id":  1001,
+                          "canonical_key":  "matnr:100",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "100"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "100",
+                                              "supply_number":  "SUP-100",
+                                              "article_number":  null,
+                                              "nato_stock_number":  "NSN-100"
+                                          },
+                          "status":  {
+                                         "material_status_code":  "11"
+                                     },
+                          "texts":  {
+                                        "short_description":  "Hydraulic oil",
+                                        "technical_note":  "",
+                                        "logistics_note":  ""
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  50,
+                                           "alternate_units":  [
+                                                                   {
+                                                                       "unit_code":  "BX",
+                                                                       "conversion_to_base":  10
+                                                                   }
+                                                               ]
+                                       },
+                          "alternates":  [
+                                             {
+                                                 "position":  1,
+                                                 "identifier":  {
+                                                                    "type":  "matnr",
+                                                                    "value":  "101"
+                                                                },
+                                                 "material_status_code":  "12",
+                                                 "preferred_unit_code":  "BX"
+                                             }
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+
+                                                                       ],
+                                              "assignment_tags":  [
+
+                                                                  ]
+                                          }
+                      }
+                  ]
+}

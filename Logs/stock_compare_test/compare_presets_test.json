@@ -1,0 +1,22 @@
+﻿{
+    "schema_version":  1,
+    "presets":  [
+                    {
+                        "Name":  "sap-stock",
+                        "FileType":  "csv",
+                        "HeaderRowIndex":  2,
+                        "WorksheetName":  null,
+                        "Delimiter":  ";",
+                        "Columns":  {
+                                        "material_number":  "MATNR",
+                                        "quantity":  "LABST",
+                                        "unit":  "MEINS",
+                                        "description":  null,
+                                        "status":  null,
+                                        "storage_location":  null,
+                                        "batch":  null,
+                                        "note":  "NOTE"
+                                    }
+                    }
+                ]
+}

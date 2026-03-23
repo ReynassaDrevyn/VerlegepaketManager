@@ -1,0 +1,40 @@
+[{
+	"resource": "/d:/VPManagerGitHub/VerlegepaketManager/Function_DataImport.ps1",
+	"owner": "_generated_diagnostic_collection_name_#2",
+	"code": "PSUseApprovedVerbs",
+	"severity": 4,
+	"message": "The cmdlet 'Normalize-AlternateRecord' uses an unapproved verb.",
+	"source": "PSScriptAnalyzer",
+	"startLineNumber": 838,
+	"startColumn": 10,
+	"endLineNumber": 838,
+	"endColumn": 35,
+	"modelVersionId": 5,
+	"origin": "extHost1"
+},{
+	"resource": "/d:/VPManagerGitHub/VerlegepaketManager/Function_DataImport.ps1",
+	"owner": "_generated_diagnostic_collection_name_#2",
+	"code": "PSUseApprovedVerbs",
+	"severity": 4,
+	"message": "The cmdlet 'Normalize-MaterialRecord' uses an unapproved verb.",
+	"source": "PSScriptAnalyzer",
+	"startLineNumber": 855,
+	"startColumn": 10,
+	"endLineNumber": 855,
+	"endColumn": 34,
+	"modelVersionId": 5,
+	"origin": "extHost1"
+},{
+	"resource": "/d:/VPManagerGitHub/VerlegepaketManager/Function_DataImport.ps1",
+	"owner": "_generated_diagnostic_collection_name_#2",
+	"code": "PSUseDeclaredVarsMoreThanAssignments",
+	"severity": 4,
+	"message": "The variable 'existingMatnr' is assigned but never used.",
+	"source": "PSScriptAnalyzer",
+	"startLineNumber": 1182,
+	"startColumn": 5,
+	"endLineNumber": 1182,
+	"endColumn": 19,
+	"modelVersionId": 5,
+	"origin": "extHost1"
+}]

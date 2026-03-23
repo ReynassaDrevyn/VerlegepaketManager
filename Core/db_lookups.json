@@ -1,0 +1,49 @@
+{
+  "responsibility_codes": [
+    { "code": "flight", "label": "Flight" },
+    { "code": "waffen", "label": "Waffen" },
+    { "code": "munition", "label": "Munition" },
+    { "code": "rts", "label": "RTS" },
+    { "code": "aug", "label": "AUG" },
+    { "code": "wef", "label": "WEF" },
+    { "code": "boge", "label": "BoGe" },
+    { "code": "hft", "label": "HFT" },
+    { "code": "lme", "label": "LME" },
+    { "code": "reg", "label": "REG" },
+    { "code": "rnw", "label": "RNW" },
+    { "code": "rad_reifen", "label": "RadReifen" }
+  ],
+  "assignment_tags": [
+    { "code": "ietpx_material", "label": "IETPX Material" },
+    { "code": "gun", "label": "GUN" },
+    { "code": "gun_on_ac", "label": "GUN ON AC" },
+    { "code": "gun_off_ac", "label": "GUN OFF AC" },
+    { "code": "iris_t", "label": "IRIS-T" },
+    { "code": "flare", "label": "FLARE" },
+    { "code": "aim_120", "label": "AIM 120" },
+    { "code": "sft_1000_l", "label": "1000 l SFT" },
+    { "code": "gbu_48", "label": "GBU 48" },
+    { "code": "meteor", "label": "Meteor" },
+    { "code": "ldp", "label": "LDP" },
+    { "code": "iwp", "label": "IWP" },
+    { "code": "cfp", "label": "CFP" },
+    { "code": "mfrl", "label": "MFRL" },
+    { "code": "owp", "label": "OWP" },
+    { "code": "chaff", "label": "CHAFF" },
+    { "code": "mel", "label": "MEL" },
+    { "code": "itspl", "label": "ITSPL" }
+  ],
+  "hazmat_flags": [
+    { "code": "gefstoff_verlegung", "label": "GefStoff Verlegung" },
+    { "code": "gefahrgut", "label": "Gefahrgut" },
+    { "code": "batterie", "label": "Batterie" }
+  ],
+  "identifier_types": [
+    { "code": "matnr", "label": "MatNr" }
+  ],
+  "unit_codes": [
+    { "code": "EA", "label": "EA" },
+    { "code": "BX", "label": "BX" },
+    { "code": "PR", "label": "PR" }
+  ]
+}

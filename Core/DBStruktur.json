@@ -1,65 +1,112 @@
 {
-  "material_class": {
-    "id": 1108,
-    "matnr_main": "121265350",
-    "description": "Pin, Spring",
-    "nato_stock_number": "121265350",
-    "supplynumber": "5315-12-126-5350",
-    "mat_stat_main": "11",
-
-    "properties": {
-      "productgroup": {
+  "schema_version": 2,
+  "lookup_file": "db_lookups.json",
+  "materials": [
+    {
+      "id": 1108,
+      "canonical_key": "matnr:121265350",
+      "primary_identifier": {
+        "type": "matnr",
+        "value": "121265350"
+      },
+      "identifiers": {
+        "matnr": "121265350",
+        "supply_number": "5315-12-126-5350",
+        "article_number": null,
+        "nato_stock_number": "121265350"
+      },
+      "status": {
+        "material_status_code": "11"
+      },
+      "texts": {
+        "short_description": "Pin, Spring",
+        "technical_note": "Technischer Hinweis",
+        "logistics_note": "Logistischer Hinweis"
+      },
+      "classification": {
         "ext_wg": "09.02",
-        "dezentral": false,
-        "artnr": "6489257",
+        "is_decentral": false,
         "creditor": "12345"
       },
-      "dangerous_good": {
-        "is_dg": true,
-        "un_num": "1234",
-        "tags": ["GefStoff", "GefStoff Verlegung", "GefahrGut", "Batterie"]
+      "hazmat": {
+        "is_hazardous": true,
+        "un_number": "1234",
+        "flags": [
+          "gefstoff_verlegung",
+          "gefahrgut",
+          "batterie"
+        ]
       },
       "quantity": {
-        "unit_main": "EA",
-        "quantity_target": 10.0,
-        "alt_units": [
+        "base_unit": "EA",
+        "target": 10.0,
+        "alternate_units": [
           {
-            "unit_alt": "BX",
-            "conv_factor": 20.0
+            "unit_code": "BX",
+            "conversion_to_base": 20.0
           },
           {
-            "unit_alt": "PR",
-            "conv_factor": 2.0
+            "unit_code": "PR",
+            "conversion_to_base": 2.0
           }
         ]
-      }
-    },
-
-    "alt_material": [
-      {
-        "pos": 1,
-        "matnr_alt": "121265351",
-        "mat_stat_alt": "13"
       },
-      {
-        "pos": 2,
-        "matnr_alt": "121265352",
-        "mat_stat_alt": "10"
+      "alternates": [
+        {
+          "position": 1,
+          "identifier": {
+            "type": "matnr",
+            "value": "121265351"
+          },
+          "material_status_code": "13",
+          "preferred_unit_code": "BX"
+        },
+        {
+          "position": 2,
+          "identifier": {
+            "type": "matnr",
+            "value": "121265352"
+          },
+          "material_status_code": "10",
+          "preferred_unit_code": "PR"
+        }
+      ],
+      "assignments": {
+        "responsibility_codes": [
+          "flight",
+          "waffen",
+          "munition",
+          "rts",
+          "aug",
+          "wef",
+          "boge",
+          "hft",
+          "lme",
+          "reg",
+          "rnw",
+          "rad_reifen"
+        ],
+        "assignment_tags": [
+          "ietpx_material",
+          "gun",
+          "gun_on_ac",
+          "gun_off_ac",
+          "iris_t",
+          "flare",
+          "aim_120",
+          "sft_1000_l",
+          "gbu_48",
+          "meteor",
+          "ldp",
+          "iwp",
+          "cfp",
+          "mfrl",
+          "owp",
+          "chaff",
+          "mel",
+          "itspl"
+        ]
       }
-    ],
-
-    "mat_ref": {
-      "WtgWaStff": ["Flight", "Waffen", "Munition"],
-      "Inst/Elo": ["RTS", "AUG", "WEF", "BoGe", "HFT", "LME", "REG", "RNW", "GUN"]
-    },
-
-    "comments": {
-      "logistics": "Logistischer Kommentar",
-      "technical": "Technischer Kommentar"
-    },
-
-    "misc": {
-      "tags": ["AIM120", "IRIS-T", "LDP"]
     }
-  }
+  ]
 }

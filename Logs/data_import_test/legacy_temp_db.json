@@ -1,0 +1,481 @@
+﻿{
+    "schema_version":  2,
+    "materials":  [
+                      {
+                          "id":  1108,
+                          "canonical_key":  "matnr:121265350",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "121265350"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "121265350",
+                                              "supply_number":  "5315-12-126-5350",
+                                              "article_number":  null,
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "XX"
+                                     },
+                          "texts":  {
+                                        "short_description":  "Pin, Spring",
+                                        "technical_note":  "Brech Cylinder Housing",
+                                        "logistics_note":  ""
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "09.02",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  2,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "waffen"
+                                                                       ],
+                                              "assignment_tags":  [
+                                                                      "ietpx_material",
+                                                                      "gun",
+                                                                      "gun_off_ac"
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  4132,
+                          "canonical_key":  "matnr:121909027",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "121909027"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "121909027",
+                                              "supply_number":  "6140-12-190-9027",
+                                              "article_number":  null,
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "XX"
+                                     },
+                          "texts":  {
+                                        "short_description":  "BATTERIE, WIEDERAUFLDB.; 100Ah; 12V",
+                                        "technical_note":  "Batterie 12V 100 Ah für MIL Power",
+                                        "logistics_note":  "GefGut Batterie Blei-Batterie, wiederaufladbar"
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "09.02",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  true,
+                                         "un_number":  null,
+                                         "flags":  [
+                                                       "gefstoff_verlegung",
+                                                       "batterie"
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  2,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "boge"
+                                                                       ],
+                                              "assignment_tags":  [
+
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  1243,
+                          "canonical_key":  "matnr:123736735",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "123736735"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "123736735",
+                                              "supply_number":  "5306-12-373-6735",
+                                              "article_number":  null,
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "XX"
+                                     },
+                          "texts":  {
+                                        "short_description":  "SCHRAUBE MIT KOPF",
+                                        "technical_note":  "Schraube HP5 Valve 6x pro TWK",
+                                        "logistics_note":  ""
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "09.02",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  12,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "lme"
+                                                                       ],
+                                              "assignment_tags":  [
+
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  12,
+                          "canonical_key":  "matnr:011300000xx0301:d3309:1",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "011300000XX0301:D3309:1"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "011300000XX0301:D3309:1",
+                                              "supply_number":  "2925-12-373-3249",
+                                              "article_number":  null,
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "XX"
+                                     },
+                          "texts":  {
+                                        "short_description":  "DIGITAL ENGINE CONTROL AND MONITORING UN",
+                                        "technical_note":  "Tranche 2 Twk DECMU",
+                                        "logistics_note":  ""
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "09.02",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  2,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "lme"
+                                                                       ],
+                                              "assignment_tags":  [
+                                                                      "ietpx_material"
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  6948,
+                          "canonical_key":  "matnr:art.-nr.: 4749",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "Art.-Nr.: 4749"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "Art.-Nr.: 4749",
+                                              "supply_number":  "dezentral",
+                                              "article_number":  "Art.-Nr.: 4749",
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "11"
+                                     },
+                          "texts":  {
+                                        "short_description":  "3M Cleaner Spray Typ 50098",
+                                        "technical_note":  "74-GefG-006",
+                                        "logistics_note":  "Art.-Nr.: 4749"
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "dezentral",
+                                                 "is_decentral":  true,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  true,
+                                         "un_number":  null,
+                                         "flags":  [
+                                                       "gefstoff_verlegung",
+                                                       "gefahrgut"
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  1,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "wef"
+                                                                       ],
+                                              "assignment_tags":  [
+
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  7717,
+                          "canonical_key":  "matnr:art.-nr.: 5039000-032001.000.0",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "Art.-Nr.: 5039000-032001.000.0"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "Art.-Nr.: 5039000-032001.000.0",
+                                              "supply_number":  "dezentral",
+                                              "article_number":  "Reihnmetall Art.-Nr.: 5039000-032001.000.0",
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "11"
+                                     },
+                          "texts":  {
+                                        "short_description":  "Saugfilter, vollst.",
+                                        "technical_note":  "MSU",
+                                        "logistics_note":  "dez. Reihnmetall MSU (MPO 172000010 VN 1720-12-387-5942) / Dezentral, sollte aber ins Standard VP (MatStamm erstellen)"
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "dezentral",
+                                                 "is_decentral":  true,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  1,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "boge"
+                                                                       ],
+                                              "assignment_tags":  [
+
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  1107,
+                          "canonical_key":  "matnr:din1481-1,5x8:d8286:1",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "DIN1481-1,5X8:D8286:1"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "DIN1481-1,5X8:D8286:1",
+                                              "supply_number":  "5315-12-138-5444",
+                                              "article_number":  null,
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "XX"
+                                     },
+                          "texts":  {
+                                        "short_description":  "STIFT, SPANN-",
+                                        "technical_note":  "Gas Cylinder",
+                                        "logistics_note":  "Wird benötigt"
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "09.02",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  20,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "waffen"
+                                                                       ],
+                                              "assignment_tags":  [
+                                                                      "ietpx_material",
+                                                                      "gun",
+                                                                      "gun_off_ac"
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  3971,
+                          "canonical_key":  "matnr:iso8752-5x26-n-st:i9008:1",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "ISO8752-5X26-N-ST:I9008:1"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "ISO8752-5X26-N-ST:I9008:1",
+                                              "supply_number":  "5315-12-146-9789",
+                                              "article_number":  null,
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "10"
+                                     },
+                          "texts":  {
+                                        "short_description":  "STIFT, SPANN-",
+                                        "technical_note":  "",
+                                        "logistics_note":  ""
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "dezentral",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  10,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "waffen"
+                                                                       ],
+                                              "assignment_tags":  [
+                                                                      "ietpx_material",
+                                                                      "gun",
+                                                                      "gun_off_ac"
+                                                                  ]
+                                          }
+                      },
+                      {
+                          "id":  4139,
+                          "canonical_key":  "matnr:nn60945g01:8338b:1",
+                          "primary_identifier":  {
+                                                     "type":  "matnr",
+                                                     "value":  "NN60945G01:8338B:1"
+                                                 },
+                          "identifiers":  {
+                                              "matnr":  "NN60945G01:8338B:1",
+                                              "supply_number":  "6150-33-206-0763",
+                                              "article_number":  null,
+                                              "nato_stock_number":  null
+                                          },
+                          "status":  {
+                                         "material_status_code":  "XX"
+                                     },
+                          "texts":  {
+                                        "short_description":  "KABELBAUM, VERZWEIG",
+                                        "technical_note":  "Tranche 2 G-Loom ENG",
+                                        "logistics_note":  ""
+                                    },
+                          "classification":  {
+                                                 "ext_wg":  "09.02",
+                                                 "is_decentral":  false,
+                                                 "creditor":  null
+                                             },
+                          "hazmat":  {
+                                         "is_hazardous":  false,
+                                         "un_number":  null,
+                                         "flags":  [
+
+                                                   ]
+                                     },
+                          "quantity":  {
+                                           "base_unit":  "EA",
+                                           "target":  1,
+                                           "alternate_units":  [
+
+                                                               ]
+                                       },
+                          "alternates":  [
+
+                                         ],
+                          "assignments":  {
+                                              "responsibility_codes":  [
+                                                                           "lme"
+                                                                       ],
+                                              "assignment_tags":  [
+                                                                      "ietpx_material"
+                                                                  ]
+                                          }
+                      }
+                  ]
+}

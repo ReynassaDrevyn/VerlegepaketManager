@@ -1,0 +1,5 @@
+﻿MAT;QTY;UNIT;DESC
+101;2;BX;alt box row
+101;1;;alt blank unit row
+101;1;ZZ;alt invalid unit row
+999;9;EA;unknown row
